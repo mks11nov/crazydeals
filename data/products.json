@@ -69,16 +69,6 @@
       "badge": "New"
     },
     {
-      "id": "prod-008",
-      "name": "Botanical Scented Candle Set",
-      "description": "Set of three hand-poured soy candles with natural botanical fragrances. Burns for 40+ hours each.",
-      "price": 68.00,
-      "category": "Home & Living",
-      "image": "https://images.unsplash.com/photo-1602874801006-e7c1dbeb5a4d?w=800&q=80",
-      "externalBuyUrl": "https://www.example.com/buy/candle-set",
-      "badge": "Trending"
-    },
-    {
       "id": "prod-009",
       "name": "Yoga Mat Pro",
       "description": "Extra-thick non-slip yoga mat made from eco-friendly TPE material. Includes carrying strap and alignment markers.",
