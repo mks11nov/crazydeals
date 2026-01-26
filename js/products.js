@@ -48,11 +48,17 @@ function getProductSlugFromUrl() {
     
     // Extract slug from: /product/artisan-leather-messenger-bag
     // Matches both /product/slug and /products/slug
-    const match = pathname.match(/\/(?:product|products)\/([a-z0-9-]+)\/?$/);
+    //const match = pathname.match(/\/(?:product|products)\/([a-z0-9-]+)\/?$/);
     
-    if (match && match[1]) {
-        return match[1];
+    //if (match && match[1]) {
+    //    return match[1];
+    //}
+
+    const match = urlParams.get('slug');
+    if (match) {
+        return match
     }
+    
     
     // Check if old ID-based URL somehow exists (should be blocked by _redirects)
     const urlParams = new URLSearchParams(window.location.search);
@@ -123,7 +129,7 @@ function updateCanonicalUrl(slug) {
     }
     
     const baseUrl = window.location.origin;
-    canonical.setAttribute('href', `${baseUrl}/product/${slug}`);
+    canonical.setAttribute('href', `${baseUrl}/product/?slug=${slug}`);
     
     // Also update Open Graph URL for social sharing
     let ogUrl = document.querySelector('meta[property="og:url"]');
@@ -132,7 +138,7 @@ function updateCanonicalUrl(slug) {
         ogUrl.setAttribute('property', 'og:url');
         document.head.appendChild(ogUrl);
     }
-    ogUrl.setAttribute('content', `${baseUrl}/product/${slug}`);
+    ogUrl.setAttribute('content', `${baseUrl}/product/?slug=${slug}`);
 }
 
 // ===================================
