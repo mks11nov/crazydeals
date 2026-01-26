@@ -1,6 +1,7 @@
 // ===================================
 // Global State Management
 // ===================================
+
 let allProducts = [];
 let filteredProducts = [];
 let displayedProducts = [];
@@ -118,9 +119,9 @@ function initUserMenu() {
 // ===================================
 async function loadProducts() {
     try {
-        const response = await fetch('data/products.json');
-        const data = await response.json();
-        allProducts = data.products;
+        const response = await ProductAPI.getProducts(); //await fetch('data/products.json');
+        //const data = await response.json();
+        allProducts = response.data.products;
         filteredProducts = [...allProducts];
         
         populateCategoryFilter();
@@ -226,7 +227,9 @@ function createProductCard(product, index) {
     // Navigate to product detail on card click (except add to cart button)
     card.addEventListener('click', (e) => {
         if (!e.target.closest('.btn-add-cart')) {
-            window.location.href = `product.html?id=${product.id}`;
+            //window.location.href = `product.html?id=${product.id}`;
+            // Use clean URL format: /product/slug
+            window.location.href = `/product/${product.slug}`;
         }
     });
     

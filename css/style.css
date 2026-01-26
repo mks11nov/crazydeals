@@ -2316,7 +2316,8 @@ input, select {
 
 .filter-btn.active {
     background: var(--primary);
-    color: white;
+    color: rgb(57, 226, 15);
+    font-weight: bold;
     border-color: var(--primary);
 }
 

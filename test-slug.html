@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slug Test - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .product h3 {
+            margin-top: 0;
+        }
+        .slug {
+            background: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .no-slug {
+            background: #ffebee;
+            color: #c62828;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .url {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        .url:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Product Slug Test</h1>
+    <p>This page shows all products and their slugs. Use this to verify slugs exist.</p>
+    <div id="products"></div>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        async function loadAndDisplayProducts() {
+            try {
+                const response = await ProductAPI.getProducts();
+                const products = response.data.products;
+                const container = document.getElementById('products');
+                
+                if (!products || products.length === 0) {
+                    container.innerHTML = '<p style="color: red;">❌ No products found!</p>';
+                    return;
+                }
+                
+                let html = `<p>Found ${products.length} products:</p>`;
+                
+                products.forEach(product => {
+                    const hasSlug = product.slug && product.slug.trim() !== '';
+                    const slugDisplay = hasSlug 
+                        ? `<span class="slug">Slug: ${product.slug}</span>`
+                        : '<span class="no-slug">❌ NO SLUG</span>';
+                    
+                    const url = hasSlug 
+                        ? `<a href="/product/${product.slug}" class="url">http://127.0.0.1:8000/product/${product.slug}</a>`
+                        : '<span style="color: red;">Cannot generate URL (no slug)</span>';
+                    
+                    html += `
+                        <div class="product">
+                            <h3>${product.name} (ID: ${product.id})</h3>
+                            ${slugDisplay}
+                            <br>
+                            <strong>URL:</strong> ${url}
+                            <br>
+                            <small>Category: ${product.category} | Price: ₹${product.price}</small>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Count products without slugs
+                const productsWithoutSlugs = products.filter(p => !p.slug || p.slug.trim() === '');
+                if (productsWithoutSlugs.length > 0) {
+                    container.innerHTML += `
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <h3>⚠️ Warning</h3>
+                            <p>${productsWithoutSlugs.length} product(s) are missing slugs:</p>
+                            <ul>
+                                ${productsWithoutSlugs.map(p => `<li>${p.name} (ID: ${p.id})</li>`).join('')}
+                            </ul>
+                            <p><strong>Action Required:</strong> Add slug field to these products in your database.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <h3>✅ All Good!</h3>
+                            <p>All products have slugs. You should be able to access them via clean URLs.</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                document.getElementById('products').innerHTML = `
+                    <p style="color: red;">❌ Error loading products: ${error.message}</p>
+                    <p>Check console for details.</p>
+                `;
+                console.error('Error:', error);
+            }
+        }
+        
+        loadAndDisplayProducts();
+    </script>
+</body>
+</html>

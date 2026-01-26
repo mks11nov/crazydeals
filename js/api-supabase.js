@@ -165,10 +165,10 @@ export const CartAPIAdapter = {
 
     async addItem(productId, quantity) {
         // Get product details from local products.json
-        const response = await fetch('data/products.json')
-        const { products } = await response.json()
-        const product = products.find(p => p.id === productId)
-
+        //const response = await fetch('data/products.json')
+        const response = await ProductAPI.getProductsById(productId);
+        const { products } = await response.data;
+        
         if (!product) {
             return { success: false, message: 'Product not found' }
         }
@@ -239,6 +239,50 @@ export const OrderAPIAdapter = {
     }
 }
 
+export  const ProductAPIAdapter = {
+    async getProducts() {        
+        try {
+            if (!supabase) {
+                throw new Error('Supabase client not initialized');
+            }
+
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            return { success: false, message: error.message };
+        }
+    },
+
+    async getProductById(productId) {        
+        try {
+            if (!supabase) {
+                throw new Error('Supabase client not initialized');
+            }
+
+            const { data, error } = await supabase
+                .from('products')
+                .eq('id', productId)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            return { success: false, message: error.message };
+        }
+    }
+}
 // ===================================
 // Export Supabase Client (for direct access if needed)
 // ===================================

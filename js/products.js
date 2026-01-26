@@ -41,39 +41,98 @@ function initHeader() {
 }
 
 // ===================================
-// Get Product ID from URL
+// Get Product Slug from Clean URL
 // ===================================
-function getProductIdFromUrl() {
+function getProductSlugFromUrl() {
+    const pathname = window.location.pathname;
+    
+    // Extract slug from: /product/artisan-leather-messenger-bag
+    // Matches both /product/slug and /products/slug
+    const match = pathname.match(/\/(?:product|products)\/([a-z0-9-]+)\/?$/);
+    
+    if (match && match[1]) {
+        return match[1];
+    }
+    
+    // Check if old ID-based URL somehow exists (should be blocked by _redirects)
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id');
+    const oldId = urlParams.get('id');
+    
+    if (oldId) {
+        // Old ID-based URL detected - redirect to 404
+        // This shouldn't happen if _redirects is working, but safety check
+        console.warn('ID-based URL detected - redirecting to 404');
+        window.location.replace('/404.html');
+        return null;
+    }
+    
+    // No slug found - will show 404
+    return null;
 }
 
 // ===================================
-// Load All Products
+// Get Product ID from URL
+// ===================================
+//function getProductIdFromUrl() {
+//    const urlParams = new URLSearchParams(window.location.search);
+//    return urlParams.get('id');
+//}
+
+// ===================================
+// Load products
 // ===================================
 async function loadProducts() {
     try {
-        const response = await fetch('data/products.json');
-        const data = await response.json();
-        allProducts = data.products;
+        const response = await ProductAPI.getProducts(); 
+        allProducts = response.data.products;
         
-        const productId = getProductIdFromUrl();
-        if (productId) {
-            currentProduct = allProducts.find(p => p.id === productId);
+        // Get slug from clean URL
+        const productSlug = getProductSlugFromUrl();
+        
+        if (productSlug) {
+            // Find product by slug (NOT id)
+            currentProduct = allProducts.find(p => p.slug === productSlug);
             
             if (currentProduct) {
                 displayProduct(currentProduct);
                 displayRelatedProducts(currentProduct);
+                
+                // Update canonical URL for SEO
+                updateCanonicalUrl(productSlug);
             } else {
+                // Slug not found - show 404
                 showProductNotFound();
             }
         } else {
+            // No slug in URL - show 404
             showProductNotFound();
         }
     } catch (error) {
         console.error('Error loading products:', error);
         showErrorMessage();
     }
+}
+
+// Update canonical URL for SEO
+function updateCanonicalUrl(slug) {
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+    }
+    
+    const baseUrl = window.location.origin;
+    canonical.setAttribute('href', `${baseUrl}/product/${slug}`);
+    
+    // Also update Open Graph URL for social sharing
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) {
+        ogUrl = document.createElement('meta');
+        ogUrl.setAttribute('property', 'og:url');
+        document.head.appendChild(ogUrl);
+    }
+    ogUrl.setAttribute('content', `${baseUrl}/product/${slug}`);
 }
 
 // ===================================
@@ -170,7 +229,7 @@ function displayProduct(product) {
                 
                 if (response.success) {
                     // Redirect to checkout
-                    window.location.href = 'checkout.html';
+                    window.location.href = 'cart.html';
                 } else {
                     Toast.error(response.message || 'Failed to add item');
                     buyButton.disabled = false;
@@ -179,7 +238,7 @@ function displayProduct(product) {
             } else {
                 // Add to local cart and redirect
                 Cart.addToLocalCart(product, 1);
-                window.location.href = 'checkout.html';
+                window.location.href = 'cart.html';
             }
         } catch (error) {
             console.error('Buy now error:', error);
@@ -266,7 +325,7 @@ function createProductCard(product, index) {
             <p class="product-description">${product.description}</p>
             <div class="product-footer">
                 <div class="product-price">₹${product.price.toFixed(2)}</div>
-                <button class="btn-buy" onclick="handleBuyClick(event, '${product.id}')" aria-label="Buy ${product.name}">
+                <button class="btn-buy" onclick="handleBuyClick(event, '${product.slug}')" aria-label="Buy ${product.name}">
                     Buy Now
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"/>
@@ -280,7 +339,8 @@ function createProductCard(product, index) {
     // Navigate to product detail on card click (except buy button)
     card.addEventListener('click', (e) => {
         if (!e.target.closest('.btn-buy')) {
-            window.location.href = `product.html?id=${product.id}`;
+            //window.location.href = `product.html?id=${product.id}`;
+            window.location.href = `/product/${product.slug}`;
         }
     });
     
@@ -290,10 +350,12 @@ function createProductCard(product, index) {
 // ===================================
 // Handle Buy Button Click
 // ===================================
-function handleBuyClick(event, productId) {
+function handleBuyClick(event, productSlug) {
     event.stopPropagation();
     // Redirect to product detail page where user can use the Buy Now button
-    window.location.href = `product.html?id=${productId}`;
+    //window.location.href = `product.html?id=${productId}`;
+    // Use clean URL format
+    window.location.href = `/product/${productSlug}`;
 }
 
 // ===================================

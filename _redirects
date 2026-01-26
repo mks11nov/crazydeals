@@ -1,0 +1,37 @@
+# ============================================
+# CLOUDFLARE PAGES REDIRECTS & REWRITES
+# Clean Product URLs - WORKING VERSION
+# ============================================
+
+# ============================================
+# 1. TRAILING SLASH REDIRECT (Must be FIRST)
+# ============================================
+# Remove trailing slashes from URLs
+# /product/:slug/  /product/:slug  301
+
+# ============================================
+# 2. CLEAN URL REWRITES (Main functionality)
+# ============================================
+# Rewrite /product/sunglasses -> /product.html?slug=sunglasses
+# Status 200 = internal rewrite (URL stays as /product/sunglasses)
+#/product/:slug  /product.html?slug=:slug  200
+
+# Also support /products/ URLs
+# /products/:slug  /product.html?slug=:slug  200
+
+# ============================================
+# IMPORTANT NOTES:
+# ============================================
+# - Query parameter blocking (?id=*) is NOT supported in _redirects
+# - You must handle ?id= blocking in JavaScript on product.html
+# - Do NOT block /product.html directly - it needs to load!
+# - Order matters: Specific rules before general rules
+# - 200 = Rewrite (internal, user sees /product/slug)
+# - 301 = Redirect (external, URL changes in browser)
+# ============================================
+
+# ============================================
+# OPTIONAL: Redirect /product.html to homepage
+# ============================================
+# Uncomment if you want to redirect direct access to product.html
+# /product.html  /  301

@@ -130,7 +130,11 @@ function initPlaceOrder() {
             },
             billingAddress: { sameAsShipping: true },
             paymentMethod: 'COD',
-            notes: document.getElementById('notes').value.trim()
+            notes: document.getElementById('notes').value.trim(),
+            subtotal: cartData.subtotal,
+            tax: cartData.tax,
+            shipping: cartData.shipping,
+            total: cartData.total
         };
 
         const btn = document.getElementById('placeOrderBtn');

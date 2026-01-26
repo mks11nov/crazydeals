@@ -303,6 +303,14 @@ async function viewOrderDetails(orderId) {
     }
 }
 
+function calculateOrderSubtotal(items = []) {
+    return items.reduce((total, item) => {
+      const price = Number(item.price) || 0;
+      const quantity = Number(item.quantity) || 0;
+      return total + price * quantity;
+    }, 0);
+  }
+
 function createOrderDetailHTML(order) {
     const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -313,6 +321,7 @@ function createOrderDetailHTML(order) {
     });
 
     const statusClass = `status-${order.status.toLowerCase()}`;
+    const orderSubTotal = calculateOrderSubtotal(order.items);
 
     return `
         <div class="order-detail-section">
@@ -350,10 +359,9 @@ function createOrderDetailHTML(order) {
         <div class="order-detail-section">
             <h4>Shipping Address</h4>
             <div class="address-box">
-                <p><strong>${order.shippingAddress.fullName}</strong></p>
-                <p>${order.shippingAddress.addressLine1}</p>
-                ${order.shippingAddress.addressLine2 ? `<p>${order.shippingAddress.addressLine2}</p>` : ''}
-                <p>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}</p>
+                <p><strong>${order.shippingAddress.first_name} ${order.shippingAddress.last_name}</strong></p>
+                <p>${order.shippingAddress.apartment}</p>
+                <p>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zip_code}</p>
                 <p>${order.shippingAddress.country}</p>
                 <p>Phone: ${order.shippingAddress.phone}</p>
             </div>
@@ -378,19 +386,19 @@ function createOrderDetailHTML(order) {
             <div class="order-summary-detail">
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>₹${order.subtotal.toFixed(2)}</span>
+                    <span>₹${order.pricing.subtotal === undefined ? '' : order.pricing.subtotal.toFixed(2)}</span>
                 </div>
                 <div class="summary-row">
                     <span>Tax:</span>
-                    <span>₹${order.tax.toFixed(2)}</span>
+                    <span>₹${order.pricing.tax === undefined ? '' : order.pricing.tax.toFixed(2)}</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping:</span>
-                    <span>${order.shipping === 0 ? 'FREE' : '₹' + order.shipping.toFixed(2)}</span>
+                    <span>${order.pricing.shipping === 0 || order.pricing.shipping === undefined ? 'FREE' : '₹' + orderpricing.shipping.toFixed(2)}</span>
                 </div>
                 <div class="summary-row summary-total">
                     <strong>Total:</strong>
-                    <strong>₹${order.total.toFixed(2)}</strong>
+                    <strong>₹${order.pricing.total === undefined ? '' : order.pricing.total.toFixed(2)}</strong>
                 </div>
             </div>
         </div>

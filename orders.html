@@ -3,11 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Orders - Crazy Deals Mall</title>
+    <title>My Orders - Desi Bazaar Mall</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+ <!-- Modal Fix Styles -->
+ <style>
+    /* ============================================
+       FIXED MODAL STYLES - Professional Design
+       ============================================ */
+    
+    /* Modal Overlay - Hidden by Default */
+    #orderDetailModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    /* Modal Visible State */
+    #orderDetailModal.show {
+        display: flex !important;
+    }
+    
+    /* Modal Content Container */
+    #orderDetailModal .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        animation: modalSlideIn 0.3s ease-out;
+        position: relative;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Modal Header */
+    #orderDetailModal .modal-header {
+        padding: 24px 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    #orderDetailModal .modal-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: white;
+    }
+    
+    #orderDetailModal .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 8px;
+        color: white;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+    
+    #orderDetailModal .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+    
+    /* Modal Body */
+    #orderDetailModal .modal-body {
+        padding: 32px;
+        overflow-y: auto;
+        flex: 1;
+        background: white;
+    }
+    
+    /* Order Detail Sections */
+    .order-detail-section {
+        margin-bottom: 32px;
+    }
+    
+    .order-detail-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .order-detail-section h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    /* Order Detail Header */
+    .order-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding: 24px;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 12px;
+    }
+    
+    .order-detail-header h3 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #111827;
+    }
+    
+    .order-detail-header .text-muted {
+        color: #6b7280;
+        font-size: 14px;
+    }
+    
+    /* Order Items List */
+    .order-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .order-item-detail {
+        display: grid;
+        grid-template-columns: 100px 1fr auto auto;
+        gap: 20px;
+        align-items: center;
+        padding: 20px;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    
+    .order-item-detail:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .order-item-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #f3f4f6;
+        border: 2px solid #e5e7eb;
+    }
+    
+    .order-item-info h5 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #111827;
+        line-height: 1.4;
+    }
+    
+    .order-item-info .text-muted {
+        font-size: 14px;
+        color: #6b7280;
+    }
+    
+    .order-item-price,
+    .order-item-total {
+        text-align: right;
+        font-weight: 600;
+        color: #111827;
+        font-size: 15px;
+    }
+    
+    .order-item-total {
+        font-size: 18px;
+        color: #10b981;
+        font-weight: 700;
+    }
+    
+    /* Address Box */
+    .address-box {
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 24px;
+    }
+    
+    .address-box p {
+        margin-bottom: 8px;
+        color: #4b5563;
+        line-height: 1.6;
+        font-size: 15px;
+    }
+    
+    .address-box p:last-child {
+        margin-bottom: 0;
+    }
+    
+    .address-box p strong {
+        color: #111827;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 120px;
+    }
+    
+    /* Payment Info */
+    .payment-info {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 2px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 24px;
+    }
+    
+    .payment-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        font-size: 15px;
+    }
+    
+    .payment-row:not(:last-child) {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .payment-row span:first-child {
+        color: #6b7280;
+    }
+    
+    .payment-row strong {
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    /* Order Summary */
+    .order-summary-detail {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        border-radius: 12px;
+        padding: 24px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        font-size: 15px;
+    }
+    
+    .summary-row:not(:last-child) {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .summary-row span:first-child {
+        color: #6b7280;
+    }
+    
+    .summary-row span:last-child {
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    .summary-total {
+        font-size: 20px;
+        font-weight: 700;
+        padding-top: 16px;
+        margin-top: 8px;
+        border-top: 2px solid rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .summary-total span {
+        font-size: 24px;
+        color: #10b981;
+    }
+    
+    /* Order Timeline */
+    .order-timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+    
+    .order-timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 24px;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        left: -40px;
+        top: 6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 4px solid white;
+        box-shadow: 0 0 0 2px #e5e7eb, 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-content strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #111827;
+        font-weight: 600;
+        font-size: 15px;
+    }
+    
+    .timeline-content .text-muted {
+        color: #6b7280;
+        font-size: 13px;
+    }
+    
+    .timeline-content p {
+        color: #4b5563;
+        margin-top: 4px;
+        font-size: 14px;
+    }
+    
+    /* Status Badge Styling */
+    .order-status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-pending {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border: 2px solid #fbbf24;
+    }
+    
+    .status-processing {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border: 2px solid #3b82f6;
+    }
+    
+    .status-shipped {
+        background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+        color: #6b21a8;
+        border: 2px solid #a855f7;
+    }
+    
+    .status-delivered {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border: 2px solid #10b981;
+    }
+    
+    .status-cancelled {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 2px solid #ef4444;
+    }
+    
+    /* Loading State */
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        gap: 16px;
+    }
+    
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        #orderDetailModal {
+            padding: 0;
+        }
+        
+        #orderDetailModal .modal-content {
+            max-width: 100%;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+        
+        #orderDetailModal .modal-header {
+            padding: 16px 20px;
+            border-radius: 0;
+        }
+        
+        #orderDetailModal .modal-header h2 {
+            font-size: 20px;
+        }
+        
+        #orderDetailModal .modal-body {
+            padding: 20px;
+        }
+        
+        .order-item-detail {
+            grid-template-columns: 80px 1fr;
+            gap: 12px;
+        }
+        
+        .order-item-image {
+            width: 80px;
+            height: 80px;
+            grid-column: 1;
+            grid-row: 1 / 3;
+        }
+        
+        .order-item-info {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .order-item-price {
+            grid-column: 2;
+            grid-row: 2;
+            text-align: left;
+        }
+        
+        .order-item-total {
+            grid-column: 1 / 3;
+            grid-row: 3;
+            text-align: right;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .order-detail-header {
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+        }
+    }
+    
+    /* Footer Layout - Horizontal Columns */
+    .footer-content {
+        display: grid !important;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr !important;
+        gap: 2rem !important;
+        padding-bottom: 2rem !important;
+        margin-bottom: 2rem !important;
+    }
+    
+            /* Footer Links - Horizontal Layout */
+    .footer-links {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 2rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .footer-content {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    .footer-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .footer-list li {
+        list-style: none !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .footer-list li::before {
+        content: none !important;
+    }
+</style>
+
 </head>
 <body>
     <!-- Theme Toggle -->
@@ -31,7 +549,7 @@
     <!-- Header -->
     <header class="header" id="header">
         <nav class="nav container">
-            <a href="index.html" class="logo">Crazy<span>Deals</span></a>
+            <a href="index.html" class="logo">Desi<span>Bazaar</span></a>
             
             <div class="nav-menu" id="navMenu">
                 <a href="index.html" class="nav-link">Home</a>
@@ -115,14 +633,18 @@
                 </div>
             </div>
         </div>
+
+        
+
     </main>
+
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <a href="index.html" class="logo">Crazy<span>Deals</span></a>
+                    <a href="index.html" class="logo">Desi<span>Bazaar</span></a>
                     <p class="footer-tagline">Your one-stop destination for unbeatable deals on premium products.</p>
                 </div>
                 
@@ -157,7 +679,7 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2026 Crazy Deals Mall. All rights reserved.</p>
+                <p>&copy; 2026 Desi Bazaar Mall. All rights reserved.</p>
             </div>
         </div>
     </footer>

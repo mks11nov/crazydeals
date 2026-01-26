@@ -13,13 +13,9 @@ const getConfig = () => window.API_CONFIG;
 const isSupabase = () => getConfig().isSupabase();
 const isRest = () => getConfig().isRest();
 
-// ===================================
-// Supabase Client Initialization
-// ===================================
 let supabaseClient = null;
 
 if (isSupabase()) {
-    // Load Supabase from CDN
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     script.onload = () => {
@@ -29,6 +25,8 @@ if (isSupabase()) {
     };
     document.head.appendChild(script);
 }
+    
+
 
 // ===================================
 // Authentication Helpers
@@ -71,6 +69,7 @@ const Auth = {
         window.location.href = 'index.html';
     }
 };
+
 
 // ===================================
 // REST API Request Helper
@@ -119,7 +118,7 @@ async function restApiRequest(endpoint, options = {}) {
 
 async function waitForSupabase() {
     let attempts = 0;
-    while (!supabaseClient && attempts < 50) {
+    while ( !supabaseClient && attempts < 50) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
     }
@@ -355,12 +354,17 @@ const CartAPI = {
 
     async addItem(productId, quantity = 1) {
         if (isSupabase()) {
-            // Get product details from local products.json
-            const response = await fetch('data/products.json');
-            const { products } = await response.json();
-            const product = products.find(p => p.id === productId);
+            // Get product details from API
+            const productResponse = await ProductAPI.getProductsById(productId);
 
-            if (!product) {
+            if (!productResponse || !productResponse.success || !productResponse.data) {
+                return { success: false, message: 'Product not found' };
+            }
+
+            const product = productResponse.data;
+
+            // Handle case where data might be 'undefined' string
+            if (!product || product === 'undefined' || typeof product !== 'object') {
                 return { success: false, message: 'Product not found' };
             }
 
@@ -694,6 +698,41 @@ const Cart = {
         console.log(`🔄 Cart badge updated: ${itemCount} items`);
     }
 };
+
+// ===================================
+// Product API Helper
+// ===================================
+
+const ProductAPI = {
+    async getProducts() {
+        if (isSupabase()) {
+            const client = await waitForSupabase();
+            const { data } = await client.from('products')
+            .select('*');
+            //.order('created_at', { ascending: false });
+            return { success: true, data: { products: data || [] } };
+        } else {
+            const endpoint = getConfig().endpoints.product.list;
+            return await restApiRequest(endpoint);
+        }
+    },
+
+    async getProductsById(productId) {
+        if (isSupabase()) {
+            const client = await waitForSupabase();
+            const { data } = await client.from('products')
+            .select()
+            .eq('id', productId)
+            .single();
+            
+            return { success: true, data: data || 'undefined' };
+        } else {
+            const endpoint = getConfig().endpoints.product.list;
+            return await restApiRequest(endpoint);
+        }
+    }
+
+}
 
 // ===================================
 // Toast Notification Helper
